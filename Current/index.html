@@ -1,12 +1,14 @@
 <!DOCTYPE html>
 <html>
 <head>
-		<script src="phaser.js"></script>
+		<script src="assets/phaser.js"></script>
+		<script src="src/mainScene.js"></script>
+		<script src="src/uiScene.js"></script>
 </head>
 <body>
 
     <script>
-    var config = {
+    var mainSceneConfig = {
         type: Phaser.AUTO,
         width: 800,
         height: 600,
@@ -19,25 +21,25 @@
         }
     };
 
-    var game = new Phaser.Game(config);
-
+    var game = new Phaser.Game(mainSceneConfig);
+		
 	function init ()
 	{
 		this.enemyMinY = 80;
 		this.enemyMaxY = 500;
 	}
-    function preload ()
-    {
-		this.load.spritesheet('paladin', 'Paladin.png', {frameWidth: 16, frameHeight: 16, endFrame: 2})
-		this.load.spritesheet('tool', 'Tool.png', {frameWidth: 16, frameHeight: 16, endFrame: 22});
-		this.load.spritesheet('player', 'Player.png', {frameWidth: 16, frameHeight: 16});
-		this.load.spritesheet('tileSet', 'Tile.png', {frameWidth: 16, frameHeight: 16});
-		this.load.spritesheet('bomb', 'Explosion.png', {frameWidth: 96, frameHeight: 96});
-		this.load.image('background', 'background.png');
-    }
+	function preload ()
+	{
+		this.load.spritesheet('paladin', 'assets/Paladin.png', {frameWidth: 16, frameHeight: 16, endFrame: 2})
+		this.load.spritesheet('tool', 'assets/Tool.png', {frameWidth: 16, frameHeight: 16, endFrame: 22});
+		this.load.spritesheet('player', 'assets/Player.png', {frameWidth: 16, frameHeight: 16});
+		this.load.spritesheet('tileSet', 'assets/Tile.png', {frameWidth: 16, frameHeight: 16});
+		this.load.spritesheet('bomb', 'assets/Explosion.png', {frameWidth: 96, frameHeight: 96});
+		this.load.image('background', 'assets/background.png');
+	}
 
-    function create()
-    {
+	function create()
+	{
 		var background = this.add.image(0, 0, 'background')
 		background.setOrigin(0, 0);
 		background.setScale(0.5);
@@ -56,7 +58,7 @@
 						y: 3
 				}
 		});
-	
+
 
 		this.someTool = this.add.sprite(700, 300, 'tool', 15);
 		this.someTool.setScale(3);
@@ -84,8 +86,11 @@
 		this.bomb = this.add.sprite(-100, -300, 'bomb', 0)
 		this.bomb.setScale(2)
 
+		this.input.keyboard.on('keydown-ESC', function(){
+			game.scene.start('uiScene');
+		} )
 
-    }
+	}
 
 	function update()
 	{
@@ -101,7 +106,7 @@
 			if (this.input.activePointer.leftButtonReleased()) {
 				hasAnimationStarted = false;
 			}
-	
+
 		let enemyEntities = this.enemies.getChildren();
 
 		for (var i = 0; i < enemyEntities.length; i++) {
@@ -139,7 +144,30 @@
 					this.time.delayedCall(500, function() {this.scene.restart()}, [], this);
 			}
 	};
+	
+	class uiScene extends Phaser.Scene {
+		constructor(mainSceneConfig) {
+				super(mainSceneConfig)
+		}
+		
+		preload() {
+				this.load.spritesheet('spells', 'assets/Spells.png', {frameWidth: 16, frameHeight: 16});
+		}
 
+		create() {
+			this.spell = this.add.sprite(game.scene.getAt(0).player.x, 400, 'spells', 3);
+			this.input.keyboard.on('keydown-SPACE', function(){})
+		}
+
+		update() {
+			for (var spellTimer = 2 ; spellTimer >= 0; spellTimer -= 1) {
+				this.spell.x += 2	
+			}
+			this.time.delayedCall(250, function() {this.spell.destroy()}, [], this);
+		}
+}
+
+	game.scene.add('uiScene', uiScene, false, {x: 0, y: 0})
 	    </script>
 
 </body>
